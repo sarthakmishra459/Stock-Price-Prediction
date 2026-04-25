@@ -146,7 +146,7 @@ if error:
 # RESPONSE HANDLING (SAFE)
 # -------------------------------
 predictions = result.get("predictions", [])
-
+sentiment = result.get("sentiment", {})
 if not predictions:
     st.error("No predictions available for this ticker.")
     st.stop()
@@ -169,7 +169,23 @@ available_models = [
 st.info(
     f"🤖 Model Used: {selected_model.upper()} | Available: {', '.join(available_models)}"
 )
+# -------------------------------
+# SENTIMENT DISPLAY (🔥 NEW)
+# -------------------------------
+if sentiment:
+    st.subheader("🧠 Market Sentiment")
 
+    score = sentiment.get("score", 0)
+    label = sentiment.get("label", "Neutral")
+    warning = sentiment.get("warning", False)
+
+    c1, c2 = st.columns(2)
+
+    c1.metric("Sentiment", label)
+    c2.metric("Score", f"{score:.2f}")
+
+    if warning:
+        st.warning("⚠️ Market sentiment is volatile. Use predictions cautiously.")
 # -------------------------------
 # FORECAST DATES
 # -------------------------------
