@@ -1,15 +1,29 @@
 import datetime
 import pandas as pd
 import yfinance as yf
+
 from stockstats import StockDataFrame
 from sklearn.preprocessing import MinMaxScaler
 from transformers import pipeline
 
-sentiment_model = pipeline(
-    "sentiment-analysis",
-    model="ProsusAI/finbert",
-    tokenizer="ProsusAI/finbert"
-)
+
+# -------------------------------
+# Lazy-loaded FinBERT
+# -------------------------------
+sentiment_model = None
+
+
+def get_sentiment_model():
+    global sentiment_model
+
+    if sentiment_model is None:
+        sentiment_model = pipeline(
+            "sentiment-analysis",
+            model="ProsusAI/finbert",
+            tokenizer="ProsusAI/finbert"
+        )
+
+    return sentiment_model
 
 def data_collection(ticker: str) -> pd.DataFrame:
     start_date = datetime.datetime(2013, 8, 24)
@@ -128,7 +142,7 @@ def get_sentiment(ticker):
             "details": []
         }
 
-    results = sentiment_model(headlines)
+    results = get_sentiment_model()(headlines)
 
     # 🔥 Correct FinBERT scoring (confidence weighted)
     score = sum([
